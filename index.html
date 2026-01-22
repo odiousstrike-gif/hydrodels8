@@ -21,14 +21,6 @@
                         cream: { 50: '#FDFBF7', 100: '#F5F2EB', 200: '#E6E2D8', 800: '#4A453E', 900: '#2C2824' },
                         dark: { bg: '#1e1e2e', card: '#27273a', text: '#d1d0c5', error: '#ca4754' },
                         hydro: { blue: '#3B82F6', teal: '#14B8A6', orange: '#F97316' }
-                    },
-                    animation: {
-                        'fade-in': 'fadeIn 0.5s ease-out forwards',
-                        'shimmer': 'shimmer 2s linear infinite',
-                    },
-                    keyframes: {
-                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
-                        shimmer: { '0%': { backgroundPosition: '-1000px 0' }, '100%': { backgroundPosition: '1000px 0' } }
                     }
                 }
             }
@@ -39,9 +31,9 @@
         .nav-icon.active { color: #3B82F6; position: relative; }
         .nav-icon.active::after { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background-color: #3B82F6; border-radius: 50%; }
         #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 99; display: flex; flex-direction: column; gap: 10px; }
-        .toast { animation: slideInRight 0.3s ease-out forwards; background: white; border-left: 4px solid green; padding: 15px; border-radius: 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .toast { background: white; border-left: 4px solid #14B8A6; padding: 15px; border-radius: 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); animation: slideIn 0.3s ease; }
         .dark .toast { background: #27273a; color: white; }
-        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
     </style>
 </head>
 <body class="bg-cream-50 text-cream-900 dark:bg-dark-bg dark:text-dark-text min-h-screen flex flex-col font-sans transition-colors duration-300">
@@ -49,92 +41,83 @@
     <nav class="fixed top-0 w-full bg-cream-50/90 dark:bg-dark-bg/90 backdrop-blur-md z-40 border-b border-cream-200 dark:border-dark-card h-16 flex items-center justify-between px-4 md:px-8">
         <div class="flex items-center gap-2">
             <div class="w-2 h-8 bg-hydro-blue rounded-full"></div>
-            <h1 class="font-bold text-lg tracking-wide text-cream-900 dark:text-white">HYDRODELS</h1>
+            <h1 class="font-bold text-lg tracking-wide">HYDRODELS</h1>
         </div>
-        <div class="flex items-center gap-6 md:gap-10">
-            <button onclick="router('home')" class="nav-icon active text-xl hover:text-hydro-blue transition-colors p-2"><i class="fa-solid fa-house"></i></button>
-            <button onclick="router('charts')" class="nav-icon text-xl hover:text-hydro-teal transition-colors p-2"><i class="fa-solid fa-chart-line"></i></button>
-            <button onclick="router('logs')" class="nav-icon text-xl hover:text-hydro-orange transition-colors p-2"><i class="fa-solid fa-clock-rotate-left"></i></button>
-            <button onclick="router('settings')" class="nav-icon text-xl hover:text-gray-500 transition-colors p-2"><i class="fa-solid fa-gear"></i></button>
+        <div class="flex items-center gap-10">
+            <button onclick="router('home')" class="nav-icon active text-xl"><i class="fa-solid fa-house"></i></button>
+            <button onclick="router('charts')" class="nav-icon text-xl"><i class="fa-solid fa-chart-line"></i></button>
+            <button onclick="router('logs')" class="nav-icon text-xl"><i class="fa-solid fa-clock-rotate-left"></i></button>
         </div>
         <div class="hidden md:flex flex-col items-end text-xs font-medium opacity-80">
             <span id="clock-time" class="text-sm font-bold">00:00:00</span>
-            <span id="db-conn-status" class="text-xs text-gray-500 flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-gray-400"></span> Connecting...</span>
+            <span id="db-status" class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-gray-400"></span> Connecting...</span>
         </div>
     </nav>
 
-    <main id="app" class="flex-grow pt-24 pb-10 px-4 md:px-8 max-w-7xl mx-auto w-full">
-        <section id="page-home" class="space-y-8 animate-fade-in">
-            <div class="text-center md:text-left mb-6">
-                <h2 class="text-3xl font-bold mb-2 bg-gradient-to-r from-hydro-blue via-hydro-teal to-hydro-blue bg-clip-text text-transparent animate-shimmer bg-[length:200%_auto]">Monitoring Kualitas Air</h2>
-                <p class="text-sm opacity-70">Data real-time dari Kampung Kreatif Sukaruas.</p>
-                <div id="buffer-status" class="text-xs mt-2 text-hydro-blue font-mono flex items-center justify-center md:justify-start gap-2 hidden">
+    <main class="flex-grow pt-24 pb-10 px-4 md:px-8 max-w-7xl mx-auto w-full">
+        <section id="page-home" class="space-y-8">
+            <div class="text-center md:text-left">
+                <h2 class="text-3xl font-bold mb-2">Monitoring Sukaruas</h2>
+                <div id="buffer-status" class="text-xs text-hydro-blue font-mono hidden">
                     <i class="fa-solid fa-flask animate-pulse"></i> <span id="buffer-count">Sampel: 0/10</span>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-cream-100 dark:bg-dark-card p-6 rounded-2xl shadow-sm border border-cream-200 dark:border-white/5 relative overflow-hidden">
+                <div class="bg-white dark:bg-dark-card p-6 rounded-2xl shadow-sm border border-cream-200 dark:border-white/5">
                     <h3 class="text-xs font-bold opacity-40 uppercase mb-2">pH Level</h3>
-                    <div class="flex items-end gap-2"><span id="val-ph" class="text-5xl font-bold text-hydro-teal">--</span><span class="text-sm mb-2 opacity-70">pH</span></div>
-                    <div class="mt-4 h-1.5 w-full bg-gray-200 dark:bg-gray-700 rounded-full"><div id="bar-ph" class="h-full bg-hydro-teal transition-all duration-1000" style="width: 0%"></div></div>
-                    <p id="stat-ph" class="text-xs mt-2 font-medium text-gray-500">Menunggu data...</p>
+                    <div class="flex items-end gap-2">
+                        <span id="val-ph" class="text-5xl font-bold text-hydro-teal">--</span>
+                        <span class="text-sm mb-2 opacity-70">pH</span>
+                    </div>
+                    <div class="mt-4 h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                        <div id="bar-ph" class="h-full bg-hydro-teal transition-all duration-700" style="width: 0%"></div>
+                    </div>
+                    <p id="stat-ph" class="text-[10px] mt-2 font-medium opacity-50">Menunggu data awal...</p>
                 </div>
-                <div class="bg-cream-100 dark:bg-dark-card p-6 rounded-2xl shadow-sm border border-cream-200 dark:border-white/5 relative overflow-hidden">
+
+                <div class="bg-white dark:bg-dark-card p-6 rounded-2xl shadow-sm border border-cream-200 dark:border-white/5">
                     <h3 class="text-xs font-bold opacity-40 uppercase mb-2">Suhu Air</h3>
-                    <div class="flex items-end gap-2"><span id="val-temp" class="text-5xl font-bold text-hydro-orange">--</span><span class="text-sm mb-2 opacity-70">°C</span></div>
-                    <div class="mt-4 h-1.5 w-full bg-gray-200 dark:bg-gray-700 rounded-full"><div id="bar-temp" class="h-full bg-hydro-orange transition-all duration-1000" style="width: 0%"></div></div>
-                    <p id="stat-temp" class="text-xs mt-2 font-medium text-gray-500">Menunggu data...</p>
+                    <div class="flex items-end gap-2">
+                        <span id="val-temp" class="text-5xl font-bold text-hydro-orange">--</span>
+                        <span class="text-sm mb-2 opacity-70">°C</span>
+                    </div>
+                    <div class="mt-4 h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                        <div id="bar-temp" class="h-full bg-hydro-orange transition-all duration-700" style="width: 0%"></div>
+                    </div>
+                    <p id="stat-temp" class="text-[10px] mt-2 font-medium opacity-50">Menunggu data awal...</p>
                 </div>
-                <div class="bg-cream-100 dark:bg-dark-card p-6 rounded-2xl shadow-sm border border-cream-200 dark:border-white/5 relative overflow-hidden">
+
+                <div class="bg-white dark:bg-dark-card p-6 rounded-2xl shadow-sm border border-cream-200 dark:border-white/5">
                     <h3 class="text-xs font-bold opacity-40 uppercase mb-2">Kekeruhan</h3>
-                    <div class="flex items-end gap-2"><span id="val-turb" class="text-5xl font-bold text-hydro-blue">--</span><span class="text-sm mb-2 opacity-70">V</span></div>
-                    <div class="mt-4 h-1.5 w-full bg-gray-200 dark:bg-gray-700 rounded-full"><div id="bar-turb" class="h-full bg-hydro-blue transition-all duration-1000" style="width: 0%"></div></div>
-                    <p id="stat-turb" class="text-xs mt-2 font-medium text-blue-500">Voltase Sensor</p>
+                    <div class="flex items-end gap-2">
+                        <span id="val-turb" class="text-5xl font-bold text-hydro-blue">--</span>
+                        <span class="text-sm mb-2 opacity-70">V</span>
+                    </div>
+                    <div class="mt-4 h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                        <div id="bar-turb" class="h-full bg-hydro-blue transition-all duration-700" style="width: 0%"></div>
+                    </div>
+                    <p id="stat-turb" class="text-[10px] mt-2 font-medium opacity-50">Voltase Sensor</p>
                 </div>
             </div>
         </section>
 
-        <section id="page-charts" class="hidden space-y-6 animate-fade-in">
-            <h2 class="text-xl font-bold mb-4">Grafik Tren (Live)</h2>
-            <div class="grid gap-6">
-                <div class="bg-white dark:bg-dark-card p-4 rounded-xl shadow-sm border border-cream-200 dark:border-white/5">
-                    <h3 class="font-semibold text-hydro-teal text-sm mb-2">pH Air</h3>
-                    <div class="h-48 w-full"><canvas id="chartPh"></canvas></div>
-                </div>
-                <div class="bg-white dark:bg-dark-card p-4 rounded-xl shadow-sm border border-cream-200 dark:border-white/5">
-                    <h3 class="font-semibold text-hydro-orange text-sm mb-2">Suhu Air</h3>
-                    <div class="h-48 w-full"><canvas id="chartTemp"></canvas></div>
-                </div>
-                <div class="bg-white dark:bg-dark-card p-4 rounded-xl shadow-sm border border-cream-200 dark:border-white/5">
-                    <h3 class="font-semibold text-hydro-blue text-sm mb-2">Kekeruhan (Volt)</h3>
-                    <div class="h-48 w-full"><canvas id="chartTurb"></canvas></div>
-                </div>
+        <section id="page-logs" class="hidden space-y-4">
+            <h2 class="text-xl font-bold">Log Aktivitas</h2>
+            <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm overflow-hidden border border-cream-200 dark:border-white/5">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-gray-50 dark:bg-white/5 opacity-50 text-[10px] uppercase">
+                        <tr><th class="px-6 py-3">Waktu</th><th class="px-6 py-3">pH</th><th class="px-6 py-3">Suhu</th><th class="px-6 py-3">Turb</th></tr>
+                    </thead>
+                    <tbody id="logs-body" class="divide-y divide-gray-100 dark:divide-white/5">
+                        <tr><td colspan="4" class="px-6 py-10 text-center opacity-30">Mengambil database...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </section>
 
-        <section id="page-logs" class="hidden space-y-6 animate-fade-in">
-            <h2 class="text-xl font-bold">Riwayat Data Masuk</h2>
-            <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm overflow-hidden border border-cream-200 dark:border-white/5 mt-4">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left">
-                        <thead class="bg-cream-200 dark:bg-white/5 text-xs uppercase font-semibold">
-                            <tr><th class="px-6 py-4">Waktu</th><th class="px-6 py-4">pH</th><th class="px-6 py-4">Suhu</th><th class="px-6 py-4">Turbidity</th><th class="px-6 py-4">Status</th></tr>
-                        </thead>
-                        <tbody id="logs-body" class="divide-y divide-cream-200 dark:divide-white/5">
-                            <tr><td colspan="5" class="px-6 py-8 text-center opacity-50">Mengambil data...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <section id="page-settings" class="hidden space-y-6 animate-fade-in">
-            <h2 class="text-xl font-bold">Pengaturan</h2>
-            <div class="bg-cream-100 dark:bg-dark-card p-5 rounded-xl border border-cream-200 dark:border-white/5 flex items-center justify-between mt-4">
-                <div><p class="font-bold">Mode Gelap</p><p class="text-xs opacity-60">Ubah tampilan ke dark mode</p></div>
-                <input type="checkbox" id="toggle-theme" class="w-5 h-5 accent-hydro-blue">
-            </div>
+        <section id="page-charts" class="hidden">
+            <p class="opacity-50 text-center py-20 italic">Fitur grafik sedang dioptimalkan...</p>
         </section>
     </main>
     <div id="toast-container"></div>
@@ -143,134 +126,104 @@
         const SB_URL = "https://kzfigxeqoufjerdxkqpt.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6ZmlneGVxb3VmamVyZHhrcXB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwNjIxNTYsImV4cCI6MjA4NDYzODE1Nn0.G7nb1tiin8IC4Sx8x2qVLJ2a9Gy6pyctdZVg8FL_NlU";
         
+        // Memastikan client terinisialisasi sekali
         const db_client = supabase.createClient(SB_URL, SB_KEY);
         
         let dataBuffer = [];
         const BUFFER_SIZE = 10; 
-        const IDEAL = { ph: { min: 6.5, max: 8.5 }, temp: { min: 26, max: 32 }, turb: { max: 4.5 } };
-        let charts = {};
 
-        // Inisialisasi awal
         async function init() {
             try {
-                initCharts(); // Jalankan grafik dulu
-                await fetchLastData();
-                listenToData();
-                updateStatus("Connected", "text-green-600", "bg-green-500");
+                await fetchInitialData();
+                listenToRealtime();
+                updateStatus("System Online", "text-green-600", "bg-green-500");
             } catch (e) {
-                console.error(e);
-                updateStatus("Error", "text-red-600", "bg-red-500");
+                updateStatus("Offline", "text-red-500", "bg-red-500");
             }
         }
 
-        async function fetchLastData() {
+        async function fetchInitialData() {
             const { data } = await db_client.from('monitoring_air').select('*').order('created_at', { ascending: false }).limit(1);
-            if (data && data.length > 0) {
-                const row = data[0];
-                const uiData = { ph: parseFloat(row.ph || 0).toFixed(2), temp: parseFloat(row.suhu || 0).toFixed(1), turb: parseFloat(row.turbidity || 0).toFixed(2) };
-                updateDashboard(uiData);
-                addLog(uiData);
-                updateCharts(uiData);
-            }
+            if (data && data.length > 0) renderToUI(data[0], true);
         }
 
-        function listenToData() {
-            // Aktifkan Real-time Listener
-            db_client
-            .channel('monitoring-changes')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'monitoring_air' }, payload => {
-                console.log('Data Baru:', payload.new);
-                processIncomingData(payload.new);
-            })
-            .subscribe();
+        function listenToRealtime() {
+            // Jalur transparan untuk data baru
+            db_client.channel('public:monitoring_air').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'monitoring_air' }, payload => {
+                console.log("Data diterima:", payload.new);
+                handleNewData(payload.new);
+            }).subscribe();
         }
 
-        function processIncomingData(row) {
+        function handleNewData(row) {
             const ph = parseFloat(row.ph);
             const temp = parseFloat(row.suhu);
             const turb = parseFloat(row.turbidity);
-            if (isNaN(ph) || isNaN(temp)) return;
 
             dataBuffer.push({ ph, temp, turb });
+            
             document.getElementById('buffer-status').classList.remove('hidden');
             document.getElementById('buffer-count').innerText = `Sampel: ${dataBuffer.length}/${BUFFER_SIZE}`;
 
-            if (dataBuffer.length >= BUFFER_SIZE) calculateAndDisplayMean();
-        }
-
-        function calculateAndDisplayMean() {
-            const total = dataBuffer.reduce((acc, curr) => ({ ph: acc.ph + curr.ph, temp: acc.temp + curr.temp, turb: acc.turb + curr.turb }), { ph: 0, temp: 0, turb: 0 });
-            const count = dataBuffer.length;
-            const meanData = { ph: (total.ph / count).toFixed(2), temp: (total.temp / count).toFixed(1), turb: (total.turb / count).toFixed(2) };
-            updateDashboard(meanData);
-            addLog(meanData);
-            updateCharts(meanData);
-            dataBuffer = []; 
-            document.getElementById('buffer-count').innerText = "Memproses...";
-        }
-
-        function updateDashboard(data) {
-            document.getElementById('val-ph').innerText = data.ph;
-            document.getElementById('val-temp').innerText = data.temp;
-            document.getElementById('val-turb').innerText = data.turb;
-            document.getElementById('bar-ph').style.width = (data.ph/14*100) + '%';
-            document.getElementById('bar-temp').style.width = (data.temp/50*100) + '%';
-            document.getElementById('bar-turb').style.width = Math.min((data.turb/5)*100, 100) + '%';
-            const statPh = document.getElementById('stat-ph');
-            statPh.innerText = (data.ph < IDEAL.ph.min || data.ph > IDEAL.ph.max) ? "Tidak Ideal" : "Kondisi Optimal";
-            statPh.className = (data.ph < IDEAL.ph.min || data.ph > IDEAL.ph.max) ? "text-xs mt-2 font-medium text-red-500" : "text-xs mt-2 font-medium text-green-600";
-        }
-
-        function initCharts() {
-            const commonOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: {display: false} }, elements: { point: {radius: 2} }, scales: { x: {display: false}, y: {grid: {color: '#8882'}} } };
-            charts.ph = new Chart(document.getElementById('chartPh'), { type: 'line', data: {labels:[], datasets:[{data:[], borderColor:'#14B8A6', fill:true, backgroundColor:'#14B8A620'}]}, options: commonOpts });
-            charts.temp = new Chart(document.getElementById('chartTemp'), { type: 'line', data: {labels:[], datasets:[{data:[], borderColor:'#F97316', fill:true, backgroundColor:'#F9731620'}]}, options: commonOpts });
-            charts.turb = new Chart(document.getElementById('chartTurb'), { type: 'line', data: {labels:[], datasets:[{data:[], borderColor:'#3B82F6', fill:true, backgroundColor:'#3B82F620'}]}, options: commonOpts });
-        }
-
-        function updateCharts(data) {
-            const time = new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
-            [charts.ph, charts.temp, charts.turb].forEach(c => {
-                if(c.data.labels.length > 20) { c.data.labels.shift(); c.data.datasets[0].data.shift(); }
-                c.data.labels.push(time);
-            });
-            charts.ph.data.datasets[0].data.push(data.ph);
-            charts.temp.data.datasets[0].data.push(data.temp);
-            charts.turb.data.datasets[0].data.push(data.turb);
-            charts.ph.update(); charts.temp.update(); charts.turb.update();
-        }
-
-        function addLog(data) {
-            const tbody = document.getElementById('logs-body');
-            if(tbody.innerHTML.includes('Mengambil')) tbody.innerHTML = '';
-            const time = new Date().toLocaleTimeString('id-ID');
-            const row = `<tr class="border-b border-cream-200 dark:border-white/5 text-sm"><td class="px-6 py-4">${time}</td><td class="px-6 py-4 font-bold text-hydro-teal">${data.ph}</td><td class="px-6 py-4 font-bold text-hydro-orange">${data.temp}</td><td class="px-6 py-4 font-bold text-hydro-blue">${data.turb}</td><td class="px-6 py-4"><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Update</span></td></tr>`;
-            tbody.insertAdjacentHTML('afterbegin', row);
-            if(tbody.children.length > 15) tbody.lastElementChild.remove();
-        }
-
-        function updateStatus(msg, textCol, bgCol) {
-            const el = document.getElementById('db-conn-status');
-            if(el) {
-                el.innerHTML = `<span class="w-2 h-2 rounded-full ${bgCol}"></span> ${msg}`;
-                el.className = `text-xs flex items-center gap-1 ${textCol}`;
+            if (dataBuffer.length >= BUFFER_SIZE) {
+                const total = dataBuffer.reduce((acc, curr) => ({ ph: acc.ph + curr.ph, temp: acc.temp + curr.temp, turb: acc.turb + curr.turb }), { ph: 0, temp: 0, turb: 0 });
+                const mean = { ph: (total.ph/BUFFER_SIZE).toFixed(2), temp: (total.temp/BUFFER_SIZE).toFixed(1), turb: (total.turb/BUFFER_SIZE).toFixed(2) };
+                
+                renderToUI(mean, false);
+                dataBuffer = [];
             }
         }
 
-        window.router = (pageId) => {
-            ['home','charts','logs','settings'].forEach(id => document.getElementById('page-'+id).classList.add('hidden'));
-            document.getElementById('page-'+pageId).classList.remove('hidden');
-            document.querySelectorAll('.nav-icon').forEach(i => i.classList.remove('active'));
-            const idx = {'home':0, 'charts':1, 'logs':2, 'settings':3}[pageId];
-            if(document.querySelectorAll('.nav-icon')[idx]) document.querySelectorAll('.nav-icon')[idx].classList.add('active');
+        function renderToUI(data, isInitial) {
+            // Menempelkan data ke layar agar tidak ter-hide
+            document.getElementById('val-ph').innerText = data.ph;
+            document.getElementById('val-temp').innerText = data.temp;
+            document.getElementById('val-turb').innerText = data.turb;
+
+            document.getElementById('bar-ph').style.width = (data.ph/14*100) + '%';
+            document.getElementById('bar-temp').style.width = (data.temp/50*100) + '%';
+            document.getElementById('bar-turb').style.width = Math.min((data.turb/5)*100, 100) + '%';
+
+            document.getElementById('stat-ph').innerText = (data.ph >= 6.5 && data.ph <= 8.5) ? "Kondisi Optimal" : "Cek Kondisi Air";
+            document.getElementById('stat-ph').className = (data.ph >= 6.5 && data.ph <= 8.5) ? "text-[10px] mt-2 font-medium text-green-600" : "text-[10px] mt-2 font-medium text-red-500";
+
+            if(!isInitial) {
+                const tbody = document.getElementById('logs-body');
+                if(tbody.innerHTML.includes('Mengambil')) tbody.innerHTML = '';
+                const time = new Date().toLocaleTimeString('id-ID');
+                const row = `<tr class="border-b border-gray-50 dark:border-white/5"><td class="px-6 py-3 font-mono opacity-50 text-[10px]">${time}</td><td class="px-6 py-3 font-bold text-hydro-teal">${data.ph}</td><td class="px-6 py-3 font-bold text-hydro-orange">${data.temp}</td><td class="px-6 py-3 font-bold text-hydro-blue">${data.turb}</td></tr>`;
+                tbody.insertAdjacentHTML('afterbegin', row);
+                if(tbody.children.length > 10) tbody.lastElementChild.remove();
+                
+                showToast("Update Realtime Berhasil");
+            }
+        }
+
+        function updateStatus(msg, textCol, bgCol) {
+            const el = document.getElementById('db-status');
+            el.innerHTML = `<span class="w-2 h-2 rounded-full ${bgCol}"></span> ${msg}`;
+            el.className = `flex items-center gap-1 ${textCol}`;
+        }
+
+        function showToast(msg) {
+            const container = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            t.className = "toast p-4 text-xs font-bold shadow-lg";
+            t.innerText = msg;
+            container.appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
+
+        window.router = (id) => {
+            ['home', 'logs', 'charts'].forEach(p => document.getElementById('page-'+p).classList.add('hidden'));
+            document.getElementById('page-'+id).classList.remove('hidden');
+            document.querySelectorAll('.nav-icon').forEach(btn => btn.classList.remove('active'));
+            const idx = {'home':0, 'charts':1, 'logs':2}[id];
+            document.querySelectorAll('.nav-icon')[idx].classList.add('active');
         };
 
-        window.addEventListener('load', init);
-        document.getElementById('toggle-theme').addEventListener('change', () => document.documentElement.classList.toggle('dark'));
-        setInterval(() => {
-            const clock = document.getElementById('clock-time');
-            if(clock) clock.innerText = new Date().toLocaleTimeString('id-ID');
-        }, 1000);
+        window.onload = init;
+        setInterval(() => document.getElementById('clock-time').innerText = new Date().toLocaleTimeString('id-ID'), 1000);
     </script>
 </body>
 </html>
