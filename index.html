@@ -64,12 +64,9 @@
     </nav>
 
     <main id="app" class="flex-grow pt-24 pb-10 px-4 md:px-8 max-w-7xl mx-auto w-full">
-        
         <section id="page-home" class="space-y-8 animate-fade-in">
             <div class="text-center md:text-left mb-6">
-                <h2 class="text-3xl font-bold mb-2 bg-gradient-to-r from-hydro-blue via-hydro-teal to-hydro-blue bg-clip-text text-transparent animate-shimmer bg-[length:200%_auto]">
-                    Monitoring Kualitas Air
-                </h2>
+                <h2 class="text-3xl font-bold mb-2 bg-gradient-to-r from-hydro-blue via-hydro-teal to-hydro-blue bg-clip-text text-transparent animate-shimmer bg-[length:200%_auto]">Monitoring Kualitas Air</h2>
                 <p class="text-sm opacity-70">Data real-time dari Kampung Kreatif Sukaruas.</p>
                 <div id="buffer-status" class="text-xs mt-2 text-hydro-blue font-mono flex items-center justify-center md:justify-start gap-2 hidden">
                     <i class="fa-solid fa-flask animate-pulse"></i> <span id="buffer-count">Sampel: 0/10</span>
@@ -79,30 +76,19 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-cream-100 dark:bg-dark-card p-6 rounded-2xl shadow-sm border border-cream-200 dark:border-white/5 relative overflow-hidden">
                     <h3 class="text-xs font-bold opacity-40 uppercase mb-2">pH Level</h3>
-                    <div class="flex items-end gap-2">
-                        <span id="val-ph" class="text-5xl font-bold text-hydro-teal">--</span>
-                        <span class="text-sm mb-2 opacity-70">pH</span>
-                    </div>
+                    <div class="flex items-end gap-2"><span id="val-ph" class="text-5xl font-bold text-hydro-teal">--</span><span class="text-sm mb-2 opacity-70">pH</span></div>
                     <div class="mt-4 h-1.5 w-full bg-gray-200 dark:bg-gray-700 rounded-full"><div id="bar-ph" class="h-full bg-hydro-teal transition-all duration-1000" style="width: 0%"></div></div>
                     <p id="stat-ph" class="text-xs mt-2 font-medium text-gray-500">Menunggu data...</p>
                 </div>
-
                 <div class="bg-cream-100 dark:bg-dark-card p-6 rounded-2xl shadow-sm border border-cream-200 dark:border-white/5 relative overflow-hidden">
                     <h3 class="text-xs font-bold opacity-40 uppercase mb-2">Suhu Air</h3>
-                    <div class="flex items-end gap-2">
-                        <span id="val-temp" class="text-5xl font-bold text-hydro-orange">--</span>
-                        <span class="text-sm mb-2 opacity-70">°C</span>
-                    </div>
+                    <div class="flex items-end gap-2"><span id="val-temp" class="text-5xl font-bold text-hydro-orange">--</span><span class="text-sm mb-2 opacity-70">°C</span></div>
                     <div class="mt-4 h-1.5 w-full bg-gray-200 dark:bg-gray-700 rounded-full"><div id="bar-temp" class="h-full bg-hydro-orange transition-all duration-1000" style="width: 0%"></div></div>
                     <p id="stat-temp" class="text-xs mt-2 font-medium text-gray-500">Menunggu data...</p>
                 </div>
-
                 <div class="bg-cream-100 dark:bg-dark-card p-6 rounded-2xl shadow-sm border border-cream-200 dark:border-white/5 relative overflow-hidden">
                     <h3 class="text-xs font-bold opacity-40 uppercase mb-2">Kekeruhan</h3>
-                    <div class="flex items-end gap-2">
-                        <span id="val-turb" class="text-5xl font-bold text-hydro-blue">--</span>
-                        <span class="text-sm mb-2 opacity-70">V</span>
-                    </div>
+                    <div class="flex items-end gap-2"><span id="val-turb" class="text-5xl font-bold text-hydro-blue">--</span><span class="text-sm mb-2 opacity-70">V</span></div>
                     <div class="mt-4 h-1.5 w-full bg-gray-200 dark:bg-gray-700 rounded-full"><div id="bar-turb" class="h-full bg-hydro-blue transition-all duration-1000" style="width: 0%"></div></div>
                     <p id="stat-turb" class="text-xs mt-2 font-medium text-blue-500">Voltase Sensor</p>
                 </div>
@@ -133,13 +119,7 @@
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm text-left">
                         <thead class="bg-cream-200 dark:bg-white/5 text-xs uppercase font-semibold">
-                            <tr>
-                                <th class="px-6 py-4">Waktu</th>
-                                <th class="px-6 py-4">pH</th>
-                                <th class="px-6 py-4">Suhu</th>
-                                <th class="px-6 py-4">Turbidity</th>
-                                <th class="px-6 py-4">Status</th>
-                            </tr>
+                            <tr><th class="px-6 py-4">Waktu</th><th class="px-6 py-4">pH</th><th class="px-6 py-4">Suhu</th><th class="px-6 py-4">Turbidity</th><th class="px-6 py-4">Status</th></tr>
                         </thead>
                         <tbody id="logs-body" class="divide-y divide-cream-200 dark:divide-white/5">
                             <tr><td colspan="5" class="px-6 py-8 text-center opacity-50">Mengambil data...</td></tr>
@@ -156,155 +136,98 @@
                 <input type="checkbox" id="toggle-theme" class="w-5 h-5 accent-hydro-blue">
             </div>
         </section>
-
     </main>
     <div id="toast-container"></div>
 
     <script>
-        // 1. KONEKSI KE SUPABASE (Jangan Diubah URL/Key-nya)
         const SB_URL = "https://kzfigxeqoufjerdxkqpt.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6ZmlneGVxb3VmamVyZHhrcXB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwNjIxNTYsImV4cCI6MjA4NDYzODE1Nn0.G7nb1tiin8IC4Sx8x2qVLJ2a9Gy6pyctdZVg8FL_NlU";
         
         const db_client = supabase.createClient(SB_URL, SB_KEY);
         
-        // 2. SISTEM BUFFER (10 DETIK)
         let dataBuffer = [];
-        const BUFFER_SIZE = 10; // Kumpul 10 data baru dirata-rata (agar grafik mulus)
-        
-        // 3. PARAMETER IDEAL AIR (Untuk Status Warna)
-        const IDEAL = {
-            ph: { min: 6.5, max: 8.5 },
-            temp: { min: 26, max: 32 },
-            turb: { max: 4.5 }
-        };
+        const BUFFER_SIZE = 10; 
+        const IDEAL = { ph: { min: 6.5, max: 8.5 }, temp: { min: 26, max: 32 }, turb: { max: 4.5 } };
+        let charts = {};
 
-        // --- INIT DATA & CHARTS ---
+        // Inisialisasi awal
         async function init() {
             try {
-                // A. Ambil Data Terakhir Langsung (Biar Gak Kosong Pas Dibuka)
+                initCharts(); // Jalankan grafik dulu
                 await fetchLastData();
-                
-                // B. Mulai Dengerin Data Baru dari Alat (Realtime)
                 listenToData();
-
-                updateStatus("Terhubung", "text-green-600", "bg-green-500");
+                updateStatus("Connected", "text-green-600", "bg-green-500");
             } catch (e) {
-                console.error("Error:", e);
-                updateStatus("Error Koneksi", "text-red-600", "bg-red-500");
+                console.error(e);
+                updateStatus("Error", "text-red-600", "bg-red-500");
             }
         }
 
-        // FUNGSI: Ambil 1 Data Terakhir dari Database
         async function fetchLastData() {
-            const { data, error } = await db_client
-                .from('monitoring_air')
-                .select('*')
-                .order('created_at', { ascending: false })
-                .limit(1);
-
+            const { data } = await db_client.from('monitoring_air').select('*').order('created_at', { ascending: false }).limit(1);
             if (data && data.length > 0) {
                 const row = data[0];
-                // Mapping: Database(suhu, turbidity) -> Tampilan(temp, turb)
-                const uiData = {
-                    ph: parseFloat(row.ph || 0).toFixed(2),
-                    temp: parseFloat(row.suhu || 0).toFixed(1),
-                    turb: parseFloat(row.turbidity || 0).toFixed(2)
-                };
+                const uiData = { ph: parseFloat(row.ph || 0).toFixed(2), temp: parseFloat(row.suhu || 0).toFixed(1), turb: parseFloat(row.turbidity || 0).toFixed(2) };
                 updateDashboard(uiData);
                 addLog(uiData);
                 updateCharts(uiData);
             }
         }
 
-        // FUNGSI: Dengerin Data Realtime (Live)
         function listenToData() {
+            // Aktifkan Real-time Listener
             db_client
-            .channel('public:monitoring_air')
+            .channel('monitoring-changes')
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'monitoring_air' }, payload => {
-                console.log('Data Masuk:', payload.new);
+                console.log('Data Baru:', payload.new);
                 processIncomingData(payload.new);
             })
             .subscribe();
         }
 
-        // FUNGSI: Olah Data Baru Masuk
         function processIncomingData(row) {
-            // Mapping nama kolom database ke variabel kita
             const ph = parseFloat(row.ph);
-            const temp = parseFloat(row.suhu); // Kolom DB: suhu
-            const turb = parseFloat(row.turbidity); // Kolom DB: turbidity
+            const temp = parseFloat(row.suhu);
+            const turb = parseFloat(row.turbidity);
+            if (isNaN(ph) || isNaN(temp)) return;
 
-            if (isNaN(ph) || isNaN(temp)) return; // Abaikan kalau error
-
-            // Masukkan ke antrian buffer
             dataBuffer.push({ ph, temp, turb });
-            
-            // Update Text Buffer
             document.getElementById('buffer-status').classList.remove('hidden');
             document.getElementById('buffer-count').innerText = `Sampel: ${dataBuffer.length}/${BUFFER_SIZE}`;
 
-            // Kalau sudah 10 data (10 detik), hitung rata-rata & update layar
-            if (dataBuffer.length >= BUFFER_SIZE) {
-                calculateAndDisplayMean();
-            }
+            if (dataBuffer.length >= BUFFER_SIZE) calculateAndDisplayMean();
         }
 
         function calculateAndDisplayMean() {
-            const total = dataBuffer.reduce((acc, curr) => ({
-                ph: acc.ph + curr.ph,
-                temp: acc.temp + curr.temp,
-                turb: acc.turb + curr.turb
-            }), { ph: 0, temp: 0, turb: 0 });
-
+            const total = dataBuffer.reduce((acc, curr) => ({ ph: acc.ph + curr.ph, temp: acc.temp + curr.temp, turb: acc.turb + curr.turb }), { ph: 0, temp: 0, turb: 0 });
             const count = dataBuffer.length;
-            const meanData = {
-                ph: (total.ph / count).toFixed(2),
-                temp: (total.temp / count).toFixed(1),
-                turb: (total.turb / count).toFixed(2)
-            };
-
+            const meanData = { ph: (total.ph / count).toFixed(2), temp: (total.temp / count).toFixed(1), turb: (total.turb / count).toFixed(2) };
             updateDashboard(meanData);
             addLog(meanData);
             updateCharts(meanData);
-
-            // Reset Buffer
             dataBuffer = []; 
             document.getElementById('buffer-count').innerText = "Memproses...";
         }
 
-        // --- UPDATE TAMPILAN (UI) ---
         function updateDashboard(data) {
-            // Update Angka Besar
             document.getElementById('val-ph').innerText = data.ph;
             document.getElementById('val-temp').innerText = data.temp;
             document.getElementById('val-turb').innerText = data.turb;
-
-            // Update Grafik Bar (Progress Bar)
             document.getElementById('bar-ph').style.width = (data.ph/14*100) + '%';
             document.getElementById('bar-temp').style.width = (data.temp/50*100) + '%';
             document.getElementById('bar-turb').style.width = Math.min((data.turb/5)*100, 100) + '%';
-
-            // Update Status Teks (Optimal/Tidak)
             const statPh = document.getElementById('stat-ph');
-            if(data.ph < IDEAL.ph.min || data.ph > IDEAL.ph.max) { 
-                statPh.innerText = "Tidak Ideal (Perlu Cek)"; statPh.className = "text-xs mt-2 font-medium text-red-500";
-            } else { 
-                statPh.innerText = "Kondisi Optimal"; statPh.className = "text-xs mt-2 font-medium text-green-600";
-            }
-            
-            const statTemp = document.getElementById('stat-temp');
-            statTemp.innerText = (data.temp >= IDEAL.temp.min && data.temp <= IDEAL.temp.max) ? "Suhu Optimal" : "Suhu Tidak Ideal";
-            statTemp.className = (data.temp >= IDEAL.temp.min && data.temp <= IDEAL.temp.max) ? "text-xs mt-2 font-medium text-green-600" : "text-xs mt-2 font-medium text-yellow-600";
+            statPh.innerText = (data.ph < IDEAL.ph.min || data.ph > IDEAL.ph.max) ? "Tidak Ideal" : "Kondisi Optimal";
+            statPh.className = (data.ph < IDEAL.ph.min || data.ph > IDEAL.ph.max) ? "text-xs mt-2 font-medium text-red-500" : "text-xs mt-2 font-medium text-green-600";
         }
 
-        // --- UPDATE CHART & LOGS ---
-        let charts = {};
         function initCharts() {
             const commonOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: {display: false} }, elements: { point: {radius: 2} }, scales: { x: {display: false}, y: {grid: {color: '#8882'}} } };
             charts.ph = new Chart(document.getElementById('chartPh'), { type: 'line', data: {labels:[], datasets:[{data:[], borderColor:'#14B8A6', fill:true, backgroundColor:'#14B8A620'}]}, options: commonOpts });
             charts.temp = new Chart(document.getElementById('chartTemp'), { type: 'line', data: {labels:[], datasets:[{data:[], borderColor:'#F97316', fill:true, backgroundColor:'#F9731620'}]}, options: commonOpts });
             charts.turb = new Chart(document.getElementById('chartTurb'), { type: 'line', data: {labels:[], datasets:[{data:[], borderColor:'#3B82F6', fill:true, backgroundColor:'#3B82F620'}]}, options: commonOpts });
         }
+
         function updateCharts(data) {
             const time = new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
             [charts.ph, charts.temp, charts.turb].forEach(c => {
@@ -316,6 +239,7 @@
             charts.turb.data.datasets[0].data.push(data.turb);
             charts.ph.update(); charts.temp.update(); charts.turb.update();
         }
+
         function addLog(data) {
             const tbody = document.getElementById('logs-body');
             if(tbody.innerHTML.includes('Mengambil')) tbody.innerHTML = '';
@@ -325,12 +249,14 @@
             if(tbody.children.length > 15) tbody.lastElementChild.remove();
         }
 
-        // --- UTILITIES ---
         function updateStatus(msg, textCol, bgCol) {
             const el = document.getElementById('db-conn-status');
-            el.innerHTML = `<span class="w-2 h-2 rounded-full ${bgCol}"></span> ${msg}`;
-            el.className = `text-xs flex items-center gap-1 ${textCol}`;
+            if(el) {
+                el.innerHTML = `<span class="w-2 h-2 rounded-full ${bgCol}"></span> ${msg}`;
+                el.className = `text-xs flex items-center gap-1 ${textCol}`;
+            }
         }
+
         window.router = (pageId) => {
             ['home','charts','logs','settings'].forEach(id => document.getElementById('page-'+id).classList.add('hidden'));
             document.getElementById('page-'+pageId).classList.remove('hidden');
@@ -338,9 +264,13 @@
             const idx = {'home':0, 'charts':1, 'logs':2, 'settings':3}[pageId];
             if(document.querySelectorAll('.nav-icon')[idx]) document.querySelectorAll('.nav-icon')[idx].classList.add('active');
         };
-        window.addEventListener('load', () => { initCharts(); init(); });
+
+        window.addEventListener('load', init);
         document.getElementById('toggle-theme').addEventListener('change', () => document.documentElement.classList.toggle('dark'));
-        setInterval(() => document.getElementById('clock-time').innerText = new Date().toLocaleTimeString('id-ID'), 1000);
+        setInterval(() => {
+            const clock = document.getElementById('clock-time');
+            if(clock) clock.innerText = new Date().toLocaleTimeString('id-ID');
+        }, 1000);
     </script>
 </body>
 </html>
