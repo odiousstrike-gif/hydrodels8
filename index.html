@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HYDRODELS - Supabase Water Monitor</title>
+    <title>HYDRODELS - Water Monitor</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -19,196 +19,111 @@
                     fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
                     colors: {
                         cream: { 50: '#FDFBF7', 100: '#F5F2EB', 200: '#E6E2D8', 800: '#4A453E', 900: '#2C2824' },
-                        dark: { bg: '#1e1e2e', card: '#27273a', text: '#d1d0c5', error: '#ca4754' },
+                        dark: { bg: '#1e1e2e', card: '#27273a', text: '#d1d0c5' },
                         hydro: { blue: '#3B82F6', teal: '#14B8A6', orange: '#F97316' }
                     }
                 }
             }
         }
     </script>
-
-    <style>
-        html { scroll-behavior: smooth; }
-        .nav-icon.active { color: #3B82F6; position: relative; }
-        .nav-icon.active::after { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background-color: #3B82F6; border-radius: 50%; }
-        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 99; }
-    </style>
 </head>
-<body class="bg-cream-50 text-cream-900 dark:bg-dark-bg dark:text-dark-text min-h-screen transition-colors duration-300">
+<body class="bg-cream-50 text-cream-900 dark:bg-dark-bg dark:text-dark-text min-h-screen transition-all">
 
-    <nav class="fixed top-0 w-full bg-cream-50/90 dark:bg-dark-bg/90 backdrop-blur-md z-40 border-b border-cream-200 dark:border-dark-card h-16 flex items-center justify-between px-4 md:px-8">
-        <div class="flex items-center gap-2">
-            <div class="w-2 h-8 bg-hydro-blue rounded-full"></div>
-            <h1 class="font-bold text-lg tracking-wide">HYDRODELS</h1>
-        </div>
-        <div class="flex items-center gap-6">
-            <button onclick="router('home')" class="nav-icon active text-xl"><i class="fa-solid fa-house"></i></button>
-            <button onclick="router('charts')" class="nav-icon text-xl"><i class="fa-solid fa-chart-line"></i></button>
-            <button onclick="router('logs')" class="nav-icon text-xl"><i class="fa-solid fa-clock-rotate-left"></i></button>
-        </div>
-        <div class="hidden md:block text-right">
-            <p id="clock-time" class="text-sm font-bold">00:00:00</p>
-            <p id="supabase-status" class="text-[10px] text-gray-400 italic">Connecting...</p>
-        </div>
+    <nav class="fixed top-0 w-full bg-white/80 dark:bg-dark-bg/80 backdrop-blur-md z-40 border-b dark:border-white/5 h-16 flex items-center justify-between px-8">
+        <h1 class="font-bold text-lg tracking-tight">HYDRODELS</h1>
+        <div id="db-status" class="text-[10px] font-mono opacity-50 italic">Connecting to Supabase...</div>
     </nav>
 
-    <main id="app" class="pt-24 pb-10 px-4 max-w-7xl mx-auto w-full">
-        
-        <section id="page-home" class="space-y-8">
-            <div class="text-center md:text-left">
-                <h2 class="text-3xl font-bold bg-gradient-to-r from-hydro-blue to-hydro-teal bg-clip-text text-transparent">Monitoring Air Sukaruas</h2>
-                <p class="opacity-70 text-sm">Data real-time dari sensor pH, Suhu, dan Kekeruhan.</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-white dark:bg-dark-card p-6 rounded-2xl shadow-sm border dark:border-white/5">
-                    <h3 class="text-xs font-bold opacity-50 mb-1 uppercase">Tingkat pH</h3>
-                    <div class="flex items-baseline gap-1">
-                        <span id="val-ph" class="text-5xl font-bold text-hydro-teal">--</span>
-                        <span class="text-sm opacity-50">pH</span>
-                    </div>
-                    <p id="stat-ph" class="text-[10px] mt-2 font-bold uppercase tracking-wider text-gray-400">Menunggu Data...</p>
-                </div>
-
-                <div class="bg-white dark:bg-dark-card p-6 rounded-2xl shadow-sm border dark:border-white/5">
-                    <h3 class="text-xs font-bold opacity-50 mb-1 uppercase">Suhu Air</h3>
-                    <div class="flex items-baseline gap-1">
-                        <span id="val-temp" class="text-5xl font-bold text-hydro-orange">--</span>
-                        <span class="text-sm opacity-50">°C</span>
-                    </div>
-                    <p id="stat-temp" class="text-[10px] mt-2 font-bold uppercase tracking-wider text-gray-400">Menunggu Data...</p>
-                </div>
-
-                <div class="bg-white dark:bg-dark-card p-6 rounded-2xl shadow-sm border dark:border-white/5">
-                    <h3 class="text-xs font-bold opacity-50 mb-1 uppercase">Kekeruhan</h3>
-                    <div class="flex items-baseline gap-1">
-                        <span id="val-turb" class="text-5xl font-bold text-hydro-blue">--</span>
-                        <span class="text-sm opacity-50">V</span>
-                    </div>
-                    <p id="stat-turb" class="text-[10px] mt-2 font-bold uppercase tracking-wider text-gray-400">Menunggu Data...</p>
+    <main class="pt-24 pb-10 px-4 max-w-5xl mx-auto w-full">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="bg-white dark:bg-dark-card p-6 rounded-2xl shadow-sm border dark:border-white/5">
+                <h3 class="text-xs font-bold opacity-40 uppercase mb-2">pH Air</h3>
+                <div class="flex items-baseline gap-2">
+                    <span id="val-ph" class="text-5xl font-bold text-hydro-teal">--</span>
+                    <span class="text-sm opacity-40">pH</span>
                 </div>
             </div>
-        </section>
-
-        <section id="page-charts" class="hidden space-y-6">
-            <h2 class="text-xl font-bold">Grafik Riwayat</h2>
-            <div class="bg-white dark:bg-dark-card p-4 rounded-xl border dark:border-white/5 h-64">
-                <canvas id="mainChart"></canvas>
+            <div class="bg-white dark:bg-dark-card p-6 rounded-2xl shadow-sm border dark:border-white/5">
+                <h3 class="text-xs font-bold opacity-40 uppercase mb-2">Suhu</h3>
+                <div class="flex items-baseline gap-2">
+                    <span id="val-temp" class="text-5xl font-bold text-hydro-orange">--</span>
+                    <span class="text-sm opacity-40">°C</span>
+                </div>
             </div>
-        </section>
+            <div class="bg-white dark:bg-dark-card p-6 rounded-2xl shadow-sm border dark:border-white/5">
+                <h3 class="text-xs font-bold opacity-40 uppercase mb-2">Kekeruhan</h3>
+                <div class="flex items-baseline gap-2">
+                    <span id="val-turb" class="text-5xl font-bold text-hydro-blue">--</span>
+                    <span class="text-sm opacity-40">V</span>
+                </div>
+            </div>
+        </div>
 
-        <section id="page-logs" class="hidden space-y-4">
-            <h2 class="text-xl font-bold">Log Data Terakhir</h2>
-            <div class="overflow-hidden rounded-xl border dark:border-white/5">
-                <table class="w-full text-sm text-left bg-white dark:bg-dark-card">
-                    <thead class="bg-gray-50 dark:bg-white/5 text-[10px] uppercase">
-                        <tr>
-                            <th class="px-6 py-3">Waktu</th>
-                            <th class="px-6 py-3">pH</th>
-                            <th class="px-6 py-3">Suhu</th>
-                            <th class="px-6 py-3">Kekeruhan</th>
-                        </tr>
-                    </thead>
-                    <tbody id="logs-body"></tbody>
+        <div class="bg-white dark:bg-dark-card p-6 rounded-2xl shadow-sm border dark:border-white/5">
+            <h2 class="text-sm font-bold mb-4 opacity-50 uppercase">Log Terakhir (Realtime)</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <tbody id="logs-body" class="divide-y dark:divide-white/5">
+                        <tr><td class="py-4 text-center opacity-30">Menunggu data dari Sukaruas...</td></tr>
+                    </tbody>
                 </table>
             </div>
-        </section>
+        </div>
     </main>
 
-    <div id="toast-container"></div>
-
     <script>
-        // --- KONFIGURASI SUPABASE MILIKMU ---
-        const SUPABASE_URL = "https://kzfigxeqoufjerdxkqpt.supabase.co";
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6ZmlneGVxb3VmamVyZHhrcXB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwNjIxNTYsImV4cCI6MjA4NDYzODE1Nn0.G7nb1tiin8IC4Sx8x2qVLJ2a9Gy6pyctdZVg8FL_NlU";
+        // --- PERBAIKAN ERROR IDENTIFIER ---
+        const SB_URL = "https://kzfigxeqoufjerdxkqpt.supabase.co";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6ZmlneGVxb3VmamVyZHhrcXB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwNjIxNTYsImV4cCI6MjA4NDYzODE1Nn0.G7nb1tiin8IC4Sx8x2qVLJ2a9Gy6pyctdZVg8FL_NlU";
         
-        const supabase = exports.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Gunakan nama variabel yang unik agar tidak bentrok dengan library
+        const client = supabase.createClient(SB_URL, SB_KEY);
 
-        let myChart;
-
-        async function fetchInitialData() {
-            const { data, error } = await supabase
+        async function loadData() {
+            const { data, error } = await client
                 .from('monitoring_air')
                 .select('*')
                 .order('created_at', { ascending: false })
                 .limit(10);
 
             if (data && data.length > 0) {
-                updateUI(data[0]);
-                data.reverse().forEach(row => updateTableAndChart(row));
-                document.getElementById('supabase-status').innerText = "Database Connected";
+                document.getElementById('db-status').innerText = "Connected: Sukaruas Node";
+                updateDisplay(data[0]);
+                const tbody = document.getElementById('logs-body');
+                tbody.innerHTML = ''; 
+                data.forEach(row => renderRow(row));
             }
         }
 
-        function updateUI(row) {
+        function updateDisplay(row) {
             document.getElementById('val-ph').innerText = row.ph;
             document.getElementById('val-temp').innerText = row.suhu;
             document.getElementById('val-turb').innerText = row.turbidity;
-
-            // Simple Logic Status
-            document.getElementById('stat-ph').innerText = (row.ph >= 6.5 && row.ph <= 8.5) ? "NORMAL" : "PERHATIAN";
-            document.getElementById('stat-ph').className = (row.ph >= 6.5 && row.ph <= 8.5) ? "text-[10px] mt-2 font-bold text-green-500" : "text-[10px] mt-2 font-bold text-red-500";
         }
 
-        function updateTableAndChart(row) {
+        function renderRow(row) {
             const time = new Date(row.created_at).toLocaleTimeString('id-ID');
-            
-            // Update Table
             const tbody = document.getElementById('logs-body');
-            const tr = `<tr>
-                <td class="px-6 py-3 opacity-50">${time}</td>
-                <td class="px-6 py-3 font-bold">${row.ph}</td>
-                <td class="px-6 py-3 font-bold">${row.suhu}°C</td>
-                <td class="px-6 py-3 font-bold">${row.turbidity}V</td>
+            const html = `<tr>
+                <td class="py-3 font-mono opacity-50">${time}</td>
+                <td class="py-3 font-bold text-hydro-teal">${row.ph} pH</td>
+                <td class="py-3 font-bold text-hydro-orange">${row.suhu}°C</td>
+                <td class="py-3 font-bold text-hydro-blue">${row.turbidity}V</td>
             </tr>`;
-            tbody.insertAdjacentHTML('afterbegin', tr);
+            tbody.insertAdjacentHTML('afterbegin', html);
             if(tbody.children.length > 10) tbody.lastElementChild.remove();
-
-            // Update Chart
-            if(myChart) {
-                myChart.data.labels.push(time);
-                myChart.data.datasets[0].data.push(row.ph);
-                if(myChart.data.labels.length > 10) { myChart.data.labels.shift(); myChart.data.datasets[0].data.shift(); }
-                myChart.update();
-            }
         }
 
         // --- REALTIME SUBSCRIPTION ---
-        supabase
-            .channel('schema-db-changes')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'monitoring_air' }, (payload) => {
-                updateUI(payload.new);
-                updateTableAndChart(payload.new);
-                showToast("Data Baru Masuk!");
+        client
+            .channel('any')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'monitoring_air' }, payload => {
+                updateDisplay(payload.new);
+                renderRow(payload.new);
             })
             .subscribe();
 
-        // --- UI UTILS ---
-        window.router = (pageId) => {
-            ['home','charts','logs'].forEach(id => document.getElementById('page-'+id).classList.add('hidden'));
-            document.getElementById('page-'+pageId).classList.remove('hidden');
-            document.querySelectorAll('.nav-icon').forEach(i => i.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-        };
-
-        function showToast(msg) {
-            const t = document.createElement('div');
-            t.className = "bg-hydro-blue text-white px-4 py-2 rounded shadow-lg text-xs font-bold animate-bounce";
-            t.innerText = msg;
-            document.getElementById('toast-container').appendChild(t);
-            setTimeout(() => t.remove(), 3000);
-        }
-
-        // Init Chart
-        const ctx = document.getElementById('mainChart').getContext('2d');
-        myChart = new Chart(ctx, {
-            type: 'line',
-            data: { labels: [], datasets: [{ label: 'pH Level', data: [], borderColor: '#14B8A6', tension: 0.4 }] },
-            options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
-        });
-
-        window.onload = fetchInitialData;
-        setInterval(() => document.getElementById('clock-time').innerText = new Date().toLocaleTimeString('id-ID'), 1000);
+        window.onload = loadData;
     </script>
 </body>
 </html>
