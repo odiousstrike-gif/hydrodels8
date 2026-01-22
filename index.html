@@ -100,7 +100,7 @@
                     <div class="mt-4 h-1.5 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                         <div id="bar-ph" class="h-full bg-hydro-teal transition-all duration-1000" style="width: 0%"></div>
                     </div>
-                    <p id="stat-ph" class="text-xs mt-2 font-medium text-gray-500">Menunggu 1 Menit...</p>
+                    <p id="stat-ph" class="text-xs mt-2 font-medium text-gray-500">Menunggu 10 Detik...</p>
                 </div>
 
                 <div class="bg-cream-100 dark:bg-dark-card p-6 rounded-2xl shadow-sm border border-cream-200 dark:border-white/5 card-hover relative overflow-hidden group">
@@ -210,7 +210,7 @@
         
         // BUFFER SYSTEM
         let dataBuffer = [];
-        const BUFFER_SIZE = 60; // 60 data points (detik/menit)
+        const BUFFER_SIZE = 10; // 10 data points (detik/menit)
         
         // PARAMETER IDEAL
         const IDEAL = {
