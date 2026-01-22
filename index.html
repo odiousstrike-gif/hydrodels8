@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HYDRODELS - Water Monitor</title>
+    <title>HYDRODELS - Dashboard Sukaruas</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -27,24 +27,27 @@
         }
     </script>
 </head>
-<body class="bg-cream-50 text-cream-900 dark:bg-dark-bg dark:text-dark-text min-h-screen transition-all">
+<body class="bg-cream-50 text-cream-900 dark:bg-dark-bg dark:text-dark-text min-h-screen transition-all duration-300">
 
     <nav class="fixed top-0 w-full bg-white/80 dark:bg-dark-bg/80 backdrop-blur-md z-40 border-b dark:border-white/5 h-16 flex items-center justify-between px-8">
-        <h1 class="font-bold text-lg tracking-tight">HYDRODELS</h1>
-        <div id="db-status" class="text-[10px] font-mono opacity-50 italic">Connecting to Supabase...</div>
+        <div class="flex items-center gap-2">
+            <div class="w-2 h-8 bg-hydro-blue rounded-full"></div>
+            <h1 class="font-bold text-lg tracking-tight">HYDRODELS</h1>
+        </div>
+        <div id="db-status" class="text-[10px] font-mono opacity-50 italic">Connecting to Database...</div>
     </nav>
 
     <main class="pt-24 pb-10 px-4 max-w-5xl mx-auto w-full">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white dark:bg-dark-card p-6 rounded-2xl shadow-sm border dark:border-white/5">
-                <h3 class="text-xs font-bold opacity-40 uppercase mb-2">pH Air</h3>
+                <h3 class="text-xs font-bold opacity-40 uppercase mb-2">pH Level</h3>
                 <div class="flex items-baseline gap-2">
                     <span id="val-ph" class="text-5xl font-bold text-hydro-teal">--</span>
                     <span class="text-sm opacity-40">pH</span>
                 </div>
             </div>
             <div class="bg-white dark:bg-dark-card p-6 rounded-2xl shadow-sm border dark:border-white/5">
-                <h3 class="text-xs font-bold opacity-40 uppercase mb-2">Suhu</h3>
+                <h3 class="text-xs font-bold opacity-40 uppercase mb-2">Suhu Air</h3>
                 <div class="flex items-baseline gap-2">
                     <span id="val-temp" class="text-5xl font-bold text-hydro-orange">--</span>
                     <span class="text-sm opacity-40">°C</span>
@@ -60,11 +63,19 @@
         </div>
 
         <div class="bg-white dark:bg-dark-card p-6 rounded-2xl shadow-sm border dark:border-white/5">
-            <h2 class="text-sm font-bold mb-4 opacity-50 uppercase">Log Terakhir (Realtime)</h2>
+            <h2 class="text-sm font-bold mb-4 opacity-50 uppercase tracking-widest">Riwayat Data Terakhir</h2>
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="opacity-30 text-[10px] uppercase border-b dark:border-white/5">
+                            <th class="py-2">Waktu</th>
+                            <th class="py-2">pH</th>
+                            <th class="py-2">Suhu</th>
+                            <th class="py-2">Kekeruhan</th>
+                        </tr>
+                    </thead>
                     <tbody id="logs-body" class="divide-y dark:divide-white/5">
-                        <tr><td class="py-4 text-center opacity-30">Menunggu data dari Sukaruas...</td></tr>
+                        <tr><td colspan="4" class="py-8 text-center opacity-30">Mencari data di tabel...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -72,58 +83,76 @@
     </main>
 
     <script>
-        // --- PERBAIKAN ERROR IDENTIFIER ---
+        // --- KONFIGURASI SUPABASE RAJA ---
         const SB_URL = "https://kzfigxeqoufjerdxkqpt.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6ZmlneGVxb3VmamVyZHhrcXB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwNjIxNTYsImV4cCI6MjA4NDYzODE1Nn0.G7nb1tiin8IC4Sx8x2qVLJ2a9Gy6pyctdZVg8FL_NlU";
         
-        // Gunakan nama variabel yang unik agar tidak bentrok dengan library
-        const client = supabase.createClient(SB_URL, SB_KEY);
+        // Gunakan nama variabel 'db_client' agar tidak tabrakan dengan library global 'supabase'
+        const db_client = supabase.createClient(SB_URL, SB_KEY);
 
-        async function loadData() {
-            const { data, error } = await client
+        // 1. Fungsi Mengambil Data Saat Pertama Kali Dibuka
+        async function initDashboard() {
+            const { data, error } = await db_client
                 .from('monitoring_air')
                 .select('*')
                 .order('created_at', { ascending: false })
                 .limit(10);
 
+            if (error) {
+                console.error("Gagal ambil data:", error.message);
+                document.getElementById('db-status').innerText = "Error: " + error.message;
+                return;
+            }
+
             if (data && data.length > 0) {
-                document.getElementById('db-status').innerText = "Connected: Sukaruas Node";
-                updateDisplay(data[0]);
+                document.getElementById('db-status').innerText = "Connected to Sukaruas Node";
+                updateUI(data[0]);
                 const tbody = document.getElementById('logs-body');
-                tbody.innerHTML = ''; 
-                data.forEach(row => renderRow(row));
+                tbody.innerHTML = ''; // Hapus pesan loading
+                data.forEach(row => addRowToTable(row));
             }
         }
 
-        function updateDisplay(row) {
+        // 2. Fungsi Update Angka di Card
+        function updateUI(row) {
             document.getElementById('val-ph').innerText = row.ph;
             document.getElementById('val-temp').innerText = row.suhu;
             document.getElementById('val-turb').innerText = row.turbidity;
         }
 
-        function renderRow(row) {
-            const time = new Date(row.created_at).toLocaleTimeString('id-ID');
+        // 3. Fungsi Tambah Baris ke Tabel
+        function addRowToTable(row) {
+            const time = new Date(row.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             const tbody = document.getElementById('logs-body');
-            const html = `<tr>
-                <td class="py-3 font-mono opacity-50">${time}</td>
-                <td class="py-3 font-bold text-hydro-teal">${row.ph} pH</td>
-                <td class="py-3 font-bold text-hydro-orange">${row.suhu}°C</td>
-                <td class="py-3 font-bold text-hydro-blue">${row.turbidity}V</td>
-            </tr>`;
-            tbody.insertAdjacentHTML('afterbegin', html);
-            if(tbody.children.length > 10) tbody.lastElementChild.remove();
+            const newRow = `
+                <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                    <td class="py-4 font-mono opacity-50">${time}</td>
+                    <td class="py-4 font-bold text-hydro-teal">${row.ph}</td>
+                    <td class="py-4 font-bold text-hydro-orange">${row.suhu}°C</td>
+                    <td class="py-4 font-bold text-hydro-blue">${row.turbidity}V</td>
+                </tr>
+            `;
+            tbody.insertAdjacentHTML('afterbegin', newRow);
+            // Batasi hanya 10 data terbaru agar tidak lemot
+            if (tbody.children.length > 10) tbody.lastElementChild.remove();
         }
 
-        // --- REALTIME SUBSCRIPTION ---
-        client
-            .channel('any')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'monitoring_air' }, payload => {
-                updateDisplay(payload.new);
-                renderRow(payload.new);
+        // 4. AKTIFKAN FITUR REALTIME
+        // Pastikan di Supabase > Database > Replication > Source Tables, tabel monitoring_air sudah diaktifkan!
+        db_client
+            .channel('db-changes')
+            .on('postgres_changes', { 
+                event: 'INSERT', 
+                schema: 'public', 
+                table: 'monitoring_air' 
+            }, payload => {
+                console.log("Data Baru Masuk!", payload.new);
+                updateUI(payload.new);
+                addRowToTable(payload.new);
             })
             .subscribe();
 
-        window.onload = loadData;
+        window.onload = initDashboard;
     </script>
 </body>
 </html>
